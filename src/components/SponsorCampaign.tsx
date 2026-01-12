@@ -126,7 +126,7 @@ export function SponsorCampaign() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button 
                       className="bg-[#FFD700] text-[#006400] hover:bg-[#FFD700]/90 font-bold flex-1"
-                      onClick={() => window.open('https://davidombugadu2027.com', '_blank')}
+                      onClick={() => window.open('https://ombugadu.com/', '_blank')}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Visit Campaign Site
@@ -148,7 +148,7 @@ export function SponsorCampaign() {
                 <div className="mb-8 relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#008000]/20 to-[#FFD700]/20 rounded-2xl transform group-hover:scale-105 transition-transform duration-500" />
                   <img 
-                    src="https://images.unsplash.com/photo-1551135049-8a33b2f2cc1b?w=600&h=400&fit=crop"
+                    src="/uploads/David.jpeg"
                     alt="David Ombugadu"
                     className="relative rounded-2xl w-full h-64 object-cover shadow-xl"
                   />

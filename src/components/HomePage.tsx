@@ -381,12 +381,6 @@ export function HomePage({ onArticleClick }: HomePageProps) {
         </div>
       </section>
 
-      {/* Sponsor Campaign */}
-      <section id="sponsor" className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <FeaturedSponsors />
-        </div>
-      </section>
     </div>
   );
 }
