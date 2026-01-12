@@ -6,7 +6,9 @@ import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
 import { Eye, EyeOff, Mail, Lock, Shield, ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { Toaster } from "sonner";
+
+
 
 interface AdminLoginPageProps {
   onLogin: () => void;
@@ -15,7 +17,7 @@ interface AdminLoginPageProps {
 
 // Hardcoded admin credentials for constant access
 const ADMIN_CREDENTIALS = {
-  username: 'admin@veritu',
+  username: 'admin@veritus',
   password: 'adminveritus'
 };
 
