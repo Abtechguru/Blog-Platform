@@ -5,30 +5,24 @@ import { ArticleDetailPage } from './components/ArticleDetailPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ArticleEditor } from './components/ArticleEditor';
 import { UserProfile } from './components/UserProfile';
-import { AdminLoginPage } from './components/auth/AdminLoginPage';
+import { AuthPage } from './components/auth/AuthPage';
 import { NewsletterSignup } from './components/NewsletterSignup';
 import { UserManagementDashboard } from './components/admin/UserManagementDashboard';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
+import { useAuth } from './contexts/AuthContext';
 
-type Page = 'home' | 'article' | 'admin' | 'editor' | 'profile' | 'users';
+type Page = 'home' | 'article' | 'admin' | 'editor' | 'profile' | 'users' | 'auth';
 
 export default function App() {
+  const { user, profile, isLoading: authLoading } = useAuth();
+  const isAdmin = profile?.role === 'admin';
+
   const [darkMode, setDarkMode] = useState(false);
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedArticleId, setSelectedArticleId] = useState<string>('');
   const [showDevMenu, setShowDevMenu] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showNewsletterSignup, setShowNewsletterSignup] = useState(false);
-
-  // Check for stored admin session on mount
-  useEffect(() => {
-    const adminSession = localStorage.getItem('admin_session');
-    if (adminSession === 'true') {
-      setIsAdmin(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -42,31 +36,19 @@ export default function App() {
     // Check if user has already subscribed or dismissed the newsletter
     const hasSubscribed = localStorage.getItem('newsletter_subscribed');
     const hasDismissed = localStorage.getItem('newsletter_dismissed');
-    
+
     // Show newsletter popup for first-time visitors after 3 seconds
-    if (!hasSubscribed && !hasDismissed) {
+    // Only show if user is not logged in
+    if (!hasSubscribed && !hasDismissed && !user) {
       const timer = setTimeout(() => {
         setShowNewsletterSignup(true);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [user]);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-  };
-
-  const handleAdminLogin = () => {
-    setIsAdmin(true);
-    setShowAdminLogin(false);
-    setCurrentPage('admin');
-    localStorage.setItem('admin_session', 'true');
-  };
-
-  const handleAdminLogout = () => {
-    setIsAdmin(false);
-    setCurrentPage('home');
-    localStorage.removeItem('admin_session');
   };
 
   const navigateToArticle = (articleId: string) => {
@@ -83,7 +65,8 @@ export default function App() {
     if (isAdmin) {
       setCurrentPage('admin');
     } else {
-      setShowAdminLogin(true);
+      // Redirect to auth if not admin
+      setCurrentPage('auth');
     }
   };
 
@@ -92,20 +75,35 @@ export default function App() {
   };
 
   const navigateToProfile = () => {
-    setCurrentPage('profile');
+    if (user) {
+      setCurrentPage('profile');
+    } else {
+      setCurrentPage('auth');
+    }
   };
 
   const navigateToUsers = () => {
     setCurrentPage('users');
   };
 
-  // Show admin login screen
-  if (showAdminLogin) {
+  const navigateToAuth = () => {
+    setCurrentPage('auth');
+  };
+
+  const handleAuthSuccess = () => {
+    setCurrentPage('home');
+  };
+
+  // Show auth page
+  if (currentPage === 'auth') {
     return (
-      <AdminLoginPage
-        onLogin={handleAdminLogin}
-        onBack={() => setShowAdminLogin(false)}
-      />
+      <>
+        <Toaster position="top-center" richColors />
+        <AuthPage
+          onBack={navigateToHome}
+          onSuccess={handleAuthSuccess}
+        />
+      </>
     );
   }
 
@@ -129,24 +127,26 @@ export default function App() {
       >
         Article
       </Button>
-      <Button
-        size="sm"
-        variant={currentPage === 'profile' ? 'default' : 'ghost'}
-        onClick={navigateToProfile}
-        className={currentPage === 'profile' ? 'bg-[#1a365d] hover:bg-[#2d4a7c]' : ''}
-      >
-        Profile
-      </Button>
-      {!isAdmin ? (
+      {user ? (
+        <Button
+          size="sm"
+          variant={currentPage === 'profile' ? 'default' : 'ghost'}
+          onClick={navigateToProfile}
+          className={currentPage === 'profile' ? 'bg-[#1a365d] hover:bg-[#2d4a7c]' : ''}
+        >
+          Profile
+        </Button>
+      ) : (
         <Button
           size="sm"
           variant="outline"
-          onClick={navigateToAdmin}
+          onClick={navigateToAuth}
           className="border-[#1a365d] text-[#1a365d] hover:bg-[#1a365d] hover:text-white"
         >
-          Admin Login
+          Sign In
         </Button>
-      ) : (
+      )}
+      {isAdmin && (
         <>
           <Button
             size="sm"
@@ -171,14 +171,6 @@ export default function App() {
             className={currentPage === 'editor' ? 'bg-[#1a365d] hover:bg-[#2d4a7c]' : ''}
           >
             Editor
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleAdminLogout}
-            className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-          >
-            Logout
           </Button>
         </>
       )}
@@ -205,15 +197,33 @@ export default function App() {
 
       {/* Admin-only pages have their own layouts */}
       {currentPage === 'admin' ? (
-        <AdminDashboard onNewArticle={navigateToEditor} />
+        isAdmin ? (
+          <AdminDashboard onNewArticle={navigateToEditor} />
+        ) : (
+          <AuthPage onBack={navigateToHome} onSuccess={() => setCurrentPage('admin')} />
+        )
       ) : currentPage === 'editor' ? (
-        <ArticleEditor onBack={navigateToAdmin} />
+        isAdmin ? (
+          <ArticleEditor onBack={navigateToAdmin} />
+        ) : (
+          <AuthPage onBack={navigateToHome} onSuccess={() => setCurrentPage('editor')} />
+        )
       ) : currentPage === 'users' ? (
-        <div className="min-h-screen bg-background">
-          <UserManagementDashboard />
-        </div>
+        isAdmin ? (
+          <div className="min-h-screen bg-background">
+            <UserManagementDashboard />
+          </div>
+        ) : (
+          <AuthPage onBack={navigateToHome} onSuccess={() => setCurrentPage('users')} />
+        )
       ) : (
-        <Layout darkMode={darkMode} toggleDarkMode={toggleDarkMode} onNewsletterClick={() => setShowNewsletterSignup(true)}>
+        <Layout
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          onNewsletterClick={() => setShowNewsletterSignup(true)}
+          onAuthClick={navigateToAuth}
+          onProfileClick={navigateToProfile}
+        >
           {currentPage === 'home' && (
             <HomePage onArticleClick={navigateToArticle} />
           )}
@@ -225,10 +235,14 @@ export default function App() {
             />
           )}
           {currentPage === 'profile' && (
-            <UserProfile
-              onBack={navigateToHome}
-              onArticleClick={navigateToArticle}
-            />
+            user ? (
+              <UserProfile
+                onBack={navigateToHome}
+                onArticleClick={navigateToArticle}
+              />
+            ) : (
+              <AuthPage onBack={navigateToHome} onSuccess={() => setCurrentPage('profile')} />
+            )
           )}
         </Layout>
       )}

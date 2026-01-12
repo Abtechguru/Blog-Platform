@@ -1,55 +1,53 @@
-import React, { useState } from 'react'; // Added React here
+import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
-import { Eye, EyeOff, Mail, Lock, Shield, ArrowLeft } from 'lucide-react';
-import { Toaster, toast } from "sonner";
+import { Eye, EyeOff, Mail, Lock, Shield, ArrowLeft, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AdminLoginPageProps {
   onLogin: () => void;
   onBack: () => void;
 }
 
-const ADMIN_CREDENTIALS = {
-  username: 'admin@veritus.com',
-  password: 'adminveritus'
-};
-
 export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
+  const { signIn, profile } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Added React.FormEvent type here
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (email === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-      if (rememberMe) {
-        localStorage.setItem('admin_session', 'true');
-        localStorage.setItem('admin_email', email);
-      }
-      
-      toast.success('Welcome back, Admin!');
-      setTimeout(() => {
-        onLogin();
-      }, 500);
-    } else {
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      toast.error(error.message || 'Invalid credentials. Please try again.');
       setIsLoading(false);
-      toast.error('Invalid credentials. Please try again.');
+      return;
     }
+
+    // Check if user has admin role after login
+    // The auth state will be updated by the context
+    // We need to wait a moment for the profile to be fetched
+    setTimeout(() => {
+      // The profile check happens in the parent component (App.tsx)
+      // which will verify if the logged-in user has admin role
+      toast.success('Welcome back, Admin!');
+      onLogin();
+    }, 500);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background p-4">
-      <Toaster richColors position="top-center" />
-      
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#1a365d]/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#dc2626]/5 rounded-full blur-3xl" />
 
@@ -125,7 +123,6 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
                 <Checkbox
                   id="remember"
                   checked={rememberMe}
-                  // Fixed the 'any' error by casting the checked value
                   onCheckedChange={(checked: boolean) => setRememberMe(checked)}
                 />
                 <label
@@ -145,7 +142,14 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
               className="w-full bg-[#1a365d] hover:bg-[#2d4a7c] text-white"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing In...' : 'Sign In as Admin'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                'Sign In as Admin'
+              )}
             </Button>
           </form>
 
@@ -156,6 +160,7 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
                 <p className="font-medium mb-1">Secure Admin Portal</p>
                 <p className="text-muted-foreground text-xs">
                   This area is restricted to authorized administrators only.
+                  Access is verified through Supabase authentication.
                 </p>
               </div>
             </div>

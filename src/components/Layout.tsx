@@ -1,18 +1,44 @@
 import { ReactNode } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Moon, Sun, Search, Menu, Mail } from 'lucide-react';
+import { Moon, Sun, Search, Menu, Mail, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 interface LayoutProps {
   children: ReactNode;
   darkMode: boolean;
   toggleDarkMode: () => void;
   onNewsletterClick?: () => void;
+  onAuthClick?: () => void;
+  onProfileClick?: () => void;
 }
 
-export function Layout({ children, darkMode, toggleDarkMode, onNewsletterClick }: LayoutProps) {
+export function Layout({ children, darkMode, toggleDarkMode, onNewsletterClick, onAuthClick, onProfileClick }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, profile, isLoading, signOut } = useAuth();
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,6 +99,52 @@ export function Layout({ children, darkMode, toggleDarkMode, onNewsletterClick }
                   Subscribe
                 </Button>
               )}
+
+              {/* User Auth Button / Menu */}
+              {isLoading ? (
+                <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={profile?.avatar_url} alt={profile?.full_name} />
+                        <AvatarFallback className="bg-[#1a365d] text-white text-sm">
+                          {getInitials(profile?.full_name || user.email || 'U')}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{profile?.full_name || 'User'}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={onProfileClick} className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={onAuthClick}
+                  className="bg-[#1a365d] hover:bg-[#2d4a7c] text-white"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
+
               <Button
                 variant="ghost"
                 size="icon"

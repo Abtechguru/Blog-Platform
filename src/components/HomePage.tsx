@@ -74,7 +74,7 @@ const mockArticles = [
     image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=1200&h=600&fit=crop',
     author: {
       name: 'Lateef Abiodun',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
+      avatar: '/uploads/Abiodun.JPG',
       bio: 'Web Developer & Technology Architect',
       articles: 42,
       followers: 18900
