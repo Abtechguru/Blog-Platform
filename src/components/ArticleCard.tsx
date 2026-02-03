@@ -8,21 +8,15 @@ interface ArticleCardProps {
   article: Article;
   variant?: 'default' | 'horizontal' | 'featured';
   onClick?: () => void;
-  showReadMore?: boolean;
 }
 
-export function ArticleCard({ article, variant = 'default', onClick, showReadMore = true }: ArticleCardProps) {
+export function ArticleCard({ article, variant = 'default', onClick }: ArticleCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(article.bookmarked);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsBookmarked(!isBookmarked);
-  };
-
-  const handleReadMore = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onClick?.();
   };
 
   if (variant === 'featured') {
@@ -37,16 +31,15 @@ export function ArticleCard({ article, variant = 'default', onClick, showReadMor
         <img
           src={article.image}
           alt={article.title}
-          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ${
-            isHovered ? 'scale-110' : 'scale-100'
-          }`}
+          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'
+            }`}
         />
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
 
         {/* Content */}
-        <div className="absolute inset-0 p-8 flex flex-col justify-end">
+        <div className="absolute inset-0 p-4 sm:p-8 flex flex-col justify-end">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Badge className="bg-[#d4af37] text-[#1a365d] hover:bg-[#d4af37]/90 font-semibold">
@@ -57,11 +50,11 @@ export function ArticleCard({ article, variant = 'default', onClick, showReadMor
               </Badge>
             </div>
 
-            <h1 className="font-['Playfair_Display'] text-4xl md:text-5xl font-bold text-white leading-tight max-w-4xl">
+            <h1 className="font-['Playfair_Display'] text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight max-w-4xl">
               {article.title}
             </h1>
 
-            <p className="text-white/90 text-lg max-w-2xl line-clamp-2">
+            <p className="text-white/90 text-sm sm:text-lg max-w-2xl line-clamp-2">
               {article.excerpt}
             </p>
 
@@ -103,18 +96,17 @@ export function ArticleCard({ article, variant = 'default', onClick, showReadMor
   if (variant === 'horizontal') {
     return (
       <div
-        className="flex gap-4 group cursor-pointer"
+        className="flex flex-col sm:flex-row gap-4 group cursor-pointer"
         onClick={onClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="w-48 h-32 flex-shrink-0 rounded-lg overflow-hidden">
+        <div className="w-full sm:w-48 h-48 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden">
           <img
             src={article.image}
             alt={article.title}
-            className={`w-full h-full object-cover transition-transform duration-500 ${
-              isHovered ? 'scale-110' : 'scale-100'
-            }`}
+            className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? 'scale-110' : 'scale-100'
+              }`}
           />
         </div>
 
@@ -150,24 +142,21 @@ export function ArticleCard({ article, variant = 'default', onClick, showReadMor
   // Default variant
   return (
     <div
-      className={`group cursor-pointer transition-all duration-300 ${
-        isHovered ? 'transform -translate-y-2' : ''
-      }`}
+      className={`group cursor-pointer transition-all duration-300 ${isHovered ? 'transform -translate-y-2' : ''
+        }`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={`bg-card rounded-2xl overflow-hidden border border-border shadow-sm ${
-        isHovered ? 'shadow-xl shadow-primary/10' : ''
-      } transition-all duration-300`}>
+      <div className={`bg-card rounded-2xl overflow-hidden border border-border shadow-sm ${isHovered ? 'shadow-xl shadow-primary/10' : ''
+        } transition-all duration-300`}>
         {/* Image */}
         <div className="relative aspect-video overflow-hidden">
           <img
             src={article.image}
             alt={article.title}
-            className={`w-full h-full object-cover transition-transform duration-700 ${
-              isHovered ? 'scale-110' : 'scale-100'
-            }`}
+            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'
+              }`}
           />
 
           {/* Category Badge */}

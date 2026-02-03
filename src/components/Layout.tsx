@@ -47,7 +47,7 @@ export function Layout({ children, darkMode, toggleDarkMode, onNewsletterClick, 
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <div className="w-10 h-10 bg-gradient-to-br from-[#1a365d] to-[#3b82f6] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">V</span>
               </div>
@@ -63,21 +63,21 @@ export function Layout({ children, darkMode, toggleDarkMode, onNewsletterClick, 
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
-              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                Home
-              </a>
-              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                Technology
-              </a>
-              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
+              <button onClick={() => document.getElementById('trending')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-medium hover:text-primary transition-colors">
+                Trending
+              </button>
+              <button onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-medium hover:text-primary transition-colors">
                 Business
-              </a>
-              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                Culture
-              </a>
-              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                About
-              </a>
+              </button>
+              <button onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-medium hover:text-primary transition-colors">
+                Technology
+              </button>
+              <button onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-medium hover:text-primary transition-colors">
+                Politics
+              </button>
+              <button onClick={() => document.getElementById('authors')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-medium hover:text-primary transition-colors">
+                Authors
+              </button>
             </nav>
 
             {/* Actions */}
@@ -158,32 +158,36 @@ export function Layout({ children, darkMode, toggleDarkMode, onNewsletterClick, 
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <nav className="md:hidden mt-4 pt-4 border-t border-border">
+            <nav className="md:hidden mt-4 pt-4 border-t border-border animate-in slide-in-from-top-2">
               <div className="flex flex-col gap-4">
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                  Home
-                </a>
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                  Technology
-                </a>
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                  Business
-                </a>
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                  Culture
-                </a>
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
-                  About
-                </a>
+                <button onClick={() => { setMobileMenuOpen(false); document.getElementById('trending')?.scrollIntoView(); }} className="text-sm font-medium text-left hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
+                  Trending
+                </button>
+                <button onClick={() => { setMobileMenuOpen(false); document.getElementById('categories')?.scrollIntoView(); }} className="text-sm font-medium text-left hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
+                  Business & Tech
+                </button>
+                <button onClick={() => { setMobileMenuOpen(false); document.getElementById('authors')?.scrollIntoView(); }} className="text-sm font-medium text-left hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
+                  Authors
+                </button>
                 {onNewsletterClick && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={onNewsletterClick}
-                    className="gap-2 justify-start"
+                    onClick={() => { setMobileMenuOpen(false); onNewsletterClick(); }}
+                    className="gap-2 justify-start w-full"
                   >
                     <Mail className="h-4 w-4" />
                     Subscribe to Newsletter
+                  </Button>
+                )}
+                {!user && (
+                  <Button
+                    size="sm"
+                    onClick={() => { setMobileMenuOpen(false); onAuthClick?.(); }}
+                    className="bg-[#1a365d] hover:bg-[#2d4a7c] text-white w-full justify-start"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
                   </Button>
                 )}
               </div>
@@ -245,10 +249,10 @@ export function Layout({ children, darkMode, toggleDarkMode, onNewsletterClick, 
             <div>
               <h3 className="font-semibold mb-4">Categories</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Technology</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Business</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Science</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Culture</a></li>
+                <li><button onClick={() => document.getElementById('categories')?.scrollIntoView()} className="hover:text-foreground transition-colors text-left">Technology</button></li>
+                <li><button onClick={() => document.getElementById('categories')?.scrollIntoView()} className="hover:text-foreground transition-colors text-left">Business</button></li>
+                <li><button onClick={() => document.getElementById('categories')?.scrollIntoView()} className="hover:text-foreground transition-colors text-left">Science</button></li>
+                <li><button onClick={() => document.getElementById('categories')?.scrollIntoView()} className="hover:text-foreground transition-colors text-left">Culture</button></li>
               </ul>
             </div>
 

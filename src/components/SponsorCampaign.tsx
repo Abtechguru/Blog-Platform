@@ -102,7 +102,7 @@ export function SponsorCampaign({ onViewCampaign }: { onViewCampaign?: () => voi
 
                   {/* Live Stats */}
                   <div className="space-y-3 mb-8">
-                    <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20 gap-2">
                       <div className="flex items-center gap-3">
                         <Users className="h-5 w-5 text-[#FFD700]" />
                         <span className="text-sm font-medium">Supporters</span>
@@ -111,7 +111,7 @@ export function SponsorCampaign({ onViewCampaign }: { onViewCampaign?: () => voi
                         {supporters.toLocaleString()}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20 gap-2">
                       <div className="flex items-center gap-3">
                         <Heart className="h-5 w-5 text-[#FFD700]" />
                         <span className="text-sm font-medium">Campaign Fund</span>
@@ -140,6 +140,18 @@ export function SponsorCampaign({ onViewCampaign }: { onViewCampaign?: () => voi
                     <Button
                       variant="outline"
                       className="border-white text-white hover:bg-white hover:text-[#008000] flex-1"
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: 'David Ombugadu for Governor',
+                            text: 'Check out the David Ombugadu 2027 Campaign on Veritus International!',
+                            url: window.location.href,
+                          }).catch(console.error);
+                        } else {
+                          // Fallback
+                          alert("Share feature not available on this device.");
+                        }
+                      }}
                     >
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
