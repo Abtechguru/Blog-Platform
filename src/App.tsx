@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { HomePage } from './components/HomePage';
 import { ArticleDetailPage } from './components/ArticleDetailPage';
@@ -8,14 +8,17 @@ import { UserProfile } from './components/UserProfile';
 import { AuthPage } from './components/auth/AuthPage';
 import { NewsletterSignup } from './components/NewsletterSignup';
 import { UserManagementDashboard } from './components/admin/UserManagementDashboard';
+import { CampaignPopup } from './components/CampaignPopup';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
 import { useAuth } from './contexts/AuthContext';
+import { CampaignPage } from './components/CampaignPage';
 
-type Page = 'home' | 'article' | 'admin' | 'editor' | 'profile' | 'users' | 'auth';
+
+type Page = 'home' | 'article' | 'admin' | 'editor' | 'profile' | 'users' | 'auth' | 'campaign';
 
 export default function App() {
-  const { user, profile, isLoading: authLoading } = useAuth();
+  const { user, profile } = useAuth();
   const isAdmin = profile?.role === 'admin';
 
   const [darkMode, setDarkMode] = useState(false);
@@ -46,6 +49,22 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [user]);
+
+  // Update Page Title for SEO
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      home: 'Home | VERITUS INTERNATIONAL',
+      article: 'Article | VERITUS INTERNATIONAL',
+      admin: 'Admin Dashboard | VERITUS INTERNATIONAL',
+      editor: 'Article Editor | VERITUS INTERNATIONAL',
+      profile: 'User Profile | VERITUS INTERNATIONAL',
+      users: 'User Management | VERITUS INTERNATIONAL',
+
+      auth: 'Sign In | VERITUS INTERNATIONAL',
+      campaign: 'David Ombugadu 2027 | VERITUS INTERNATIONAL',
+    };
+    document.title = titles[currentPage] || 'VERITUS INTERNATIONAL';
+  }, [currentPage]);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -88,6 +107,10 @@ export default function App() {
 
   const navigateToAuth = () => {
     setCurrentPage('auth');
+  };
+
+  const navigateToCampaign = () => {
+    setCurrentPage('campaign');
   };
 
   const handleAuthSuccess = () => {
@@ -216,6 +239,8 @@ export default function App() {
         ) : (
           <AuthPage onBack={navigateToHome} onSuccess={() => setCurrentPage('users')} />
         )
+      ) : currentPage === 'campaign' ? (
+        <CampaignPage onBack={navigateToHome} />
       ) : (
         <Layout
           darkMode={darkMode}
@@ -225,7 +250,10 @@ export default function App() {
           onProfileClick={navigateToProfile}
         >
           {currentPage === 'home' && (
-            <HomePage onArticleClick={navigateToArticle} />
+            <HomePage
+              onArticleClick={navigateToArticle}
+              onViewCampaign={navigateToCampaign}
+            />
           )}
           {currentPage === 'article' && (
             <ArticleDetailPage
@@ -251,15 +279,19 @@ export default function App() {
       {showDevMenu && <DevMenu />}
 
       {/* Quick toggle button if menu is hidden */}
-      {!showDevMenu && (
-        <Button
-          size="sm"
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 shadow-2xl"
-          onClick={() => setShowDevMenu(true)}
-        >
-          Show Navigation
-        </Button>
-      )}
-    </div>
+      {
+        !showDevMenu && (
+          <Button
+            size="sm"
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 shadow-2xl"
+            onClick={() => setShowDevMenu(true)}
+          >
+            Show Navigation
+          </Button>
+        )
+      }
+      {/* Campaign Popup */}
+      <CampaignPopup onOpenCampaign={navigateToCampaign} />
+    </div >
   );
 }

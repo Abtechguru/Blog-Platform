@@ -8,9 +8,11 @@ import { TrendingUp, ArrowRight, Sparkles, Mail } from 'lucide-react';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner';
 import { FeaturedSponsors } from './FeaturedSponsors';
+import { NewsFeed } from './NewsFeed';
 
 interface HomePageProps {
   onArticleClick: (articleId: string) => void;
+  onViewCampaign?: () => void;
 }
 
 const categories = [
@@ -23,6 +25,39 @@ const categories = [
 ];
 
 const mockArticles = [
+  {
+    id: 'ombugadu-2027-declaration',
+    title: 'Editorial: See Why David Ombugadu Is The Right Man For The Job',
+    excerpt: 'A Direct Pronouncement Reorients the Political Narrative and Nullifies Deputy Ticket Rumors',
+    content: `In the prelude to every major electoral cycle, conjecture often competes with fact, and rumor attempts to masquerade as reality. The unfolding political discourse surrounding the 2027 Nasarawa State governorship race has been no exception. Persistent claims suggesting that David Ombugadu is positioning himself for a deputy governorship slot have circulated in various quarters. That narrative, however, has now been authoritatively extinguished. Ombugadu himself has made an explicit and unambiguous declaration: his aspiration is for the office of Governor.
+
+Such a forthright proclamation carries decisive weight. In political communication, there exists no higher evidentiary standard than a candidate’s own categorical statement of intent. Ombugadu’s declaration is neither implied nor speculative — it is deliberate, direct, and dispositive. It reconfigures the conversation and renders contrary insinuations untenable.
+
+The endurance of the deputy governorship rumor illustrates a familiar electoral phenomenon: premature projections and strategically seeded interpretations often seek to define candidacies before aspirants define themselves. These narratives, while sometimes politically motivated, frequently generate avoidable confusion among supporters and the broader electorate. In this instance, the candidate’s own voice has superseded the rumor mill, restoring clarity where ambiguity had been allowed to fester.
+
+Moreover, Ombugadu’s stated ambition coheres with his political pedigree, electoral history, and leadership profile. Figures who have operated at the apex of gubernatorial contests seldom recalibrate toward subordinate roles absent a formal coalition framework or negotiated alliance — neither of which has been credibly advanced here. Instead, what has emerged is a self-articulated, principal-ticket ambition that aligns with his established political trajectory.
+
+This clarification should serve as a pivot point for more substantive civic engagement. Electoral dialogue in Nasarawa State ought now to transcend speculative ticket permutations and instead interrogate matters of governance philosophy, developmental strategy, institutional reform, and administrative competence. Democracies are strengthened when voter attention is directed toward vision and viability rather than rumor and conjecture.
+
+Political commentators, stakeholders, and opinion shapers bear a corresponding obligation to elevate factual accuracy above sensational repetition. To perpetuate a disproven narrative after a candidate’s unequivocal declaration is not merely imprecise — it is intellectually negligent.
+
+With his personal and public pronouncement, David Ombugadu has conclusively settled the matter of his 2027 electoral objective. The proposition is no longer interpretive; it is declarative. His candidacy, by his own words, is aimed squarely at the governorship — unequivocally, unapologetically, and unmistakably.`,
+    category: 'Politics',
+    image: '/uploads/David.jpeg',
+    author: {
+      name: 'Veritus Editorial Board',
+      avatar: '/uploads/David.jpeg',
+      bio: 'Official Editorial Voice of Veritus International',
+      articles: 1024,
+      followers: 85400
+    },
+    publishedDate: '2026-02-03',
+    readTime: 5,
+    featured: true,
+    bookmarked: false,
+    likes: 1542,
+    views: 45200
+  },
   {
     id: '1',
     title: 'The Future of Global Markets in 2025',
@@ -39,7 +74,7 @@ const mockArticles = [
     },
     publishedDate: '2024-01-15',
     readTime: 8,
-    featured: true,
+    featured: false,
     bookmarked: false,
     likes: 234,
     views: 5420
@@ -60,7 +95,7 @@ const mockArticles = [
     },
     publishedDate: '2024-01-14',
     readTime: 6,
-    featured: true,
+    featured: false,
     bookmarked: true,
     likes: 189,
     views: 4230
@@ -88,14 +123,14 @@ const mockArticles = [
   },
 ];
 
-export function HomePage({ onArticleClick }: HomePageProps) {
-  const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
-  const [email, setEmail] = React.useState('');
-  const [articles, setArticles] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function HomePage({ onArticleClick, onViewCampaign }: HomePageProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [email, setEmail] = useState('');
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchArticles();
   }, []);
 
@@ -130,7 +165,7 @@ export function HomePage({ onArticleClick }: HomePageProps) {
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast.error('Please enter a valid email address');
       return;
@@ -201,37 +236,49 @@ export function HomePage({ onArticleClick }: HomePageProps) {
 
       {/* Featured Campaign Sponsors - Prominently at Top */}
       <section id="featured-sponsors">
-        <FeaturedSponsors />
+        <FeaturedSponsors onViewCampaign={onViewCampaign} />
       </section>
 
-      {/* Trending Section */}
+      {/* Trending Section & live News Feed */}
       <section id="trending" className="py-12 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent to-orange-500 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-white" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Trending Articles (Left Column) */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent to-orange-500 flex items-center justify-center">
+                    <TrendingUp className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-['Playfair_Display'] text-3xl font-bold">Trending Now</h2>
+                    <p className="text-muted-foreground">Most popular articles this week</p>
+                  </div>
+                </div>
+                <Button variant="ghost" className="hidden sm:flex">
+                  View All
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
-              <div>
-                <h2 className="font-['Playfair_Display'] text-3xl font-bold">Trending Now</h2>
-                <p className="text-muted-foreground">Most popular articles this week</p>
+
+              <div className="grid grid-cols-1 gap-6">
+                {trendingArticles.map((article) => (
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    variant="horizontal"
+                    onClick={() => onArticleClick(article.id)}
+                  />
+                ))}
               </div>
             </div>
-            <Button variant="ghost" className="hidden sm:flex">
-              View All
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {trendingArticles.map((article) => (
-              <ArticleCard
-                key={article.id}
-                article={article}
-                variant="horizontal"
-                onClick={() => onArticleClick(article.id)}
-              />
-            ))}
+            {/* Live News Feed (Right Column) */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                <NewsFeed />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -247,11 +294,10 @@ export function HomePage({ onArticleClick }: HomePageProps) {
           <div className="flex flex-wrap gap-3 mb-8">
             <Badge
               variant={selectedCategory === 'all' ? 'default' : 'outline'}
-              className={`cursor-pointer px-6 py-2 text-sm transition-all ${
-                selectedCategory === 'all'
-                  ? 'bg-[#1a365d] text-white hover:bg-[#2d4a7c]'
-                  : 'hover:border-primary'
-              }`}
+              className={`cursor-pointer px-6 py-2 text-sm transition-all ${selectedCategory === 'all'
+                ? 'bg-[#1a365d] text-white hover:bg-[#2d4a7c]'
+                : 'hover:border-primary'
+                }`}
               onClick={() => setSelectedCategory('all')}
             >
               All Articles
@@ -260,11 +306,10 @@ export function HomePage({ onArticleClick }: HomePageProps) {
               <Badge
                 key={category.id}
                 variant={selectedCategory === category.slug ? 'default' : 'outline'}
-                className={`cursor-pointer px-6 py-2 text-sm transition-all ${
-                  selectedCategory === category.slug
-                    ? 'bg-[#1a365d] text-white hover:bg-[#2d4a7c]'
-                    : 'hover:border-primary'
-                }`}
+                className={`cursor-pointer px-6 py-2 text-sm transition-all ${selectedCategory === category.slug
+                  ? 'bg-[#1a365d] text-white hover:bg-[#2d4a7c]'
+                  : 'hover:border-primary'
+                  }`}
                 onClick={() => setSelectedCategory(category.slug)}
                 style={
                   selectedCategory === category.slug

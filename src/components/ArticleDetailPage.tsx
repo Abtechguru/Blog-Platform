@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
 import { ArticleCard } from './ArticleCard';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { toast } from 'sonner';
+
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import { Progress } from './ui/progress';
 import { Separator } from './ui/separator';
-import { 
-  ArrowLeft, 
-  ChevronRight, 
-  Clock, 
-  Eye, 
-  Bookmark, 
-  Share2, 
-  ThumbsUp, 
-  Heart, 
-  Lightbulb, 
+import {
+  ArrowLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  Bookmark,
+  Share2,
+  ThumbsUp,
+  Heart,
+  Lightbulb,
   Flame,
   Twitter,
   Facebook,
@@ -33,19 +33,60 @@ interface Article {
   category: string;
   image: string;
   author: {
+    id: string;
     name: string;
     avatar: string;
     bio: string;
     articles: number;
     followers: number;
+    following: number;
   };
   publishDate: string;
   readTime: number;
   views: number;
+  featured: boolean;
+  bookmarked: boolean;
+  likes: number;
   tags: string[];
 }
 
 const mockArticles: Article[] = [
+  {
+    id: 'ombugadu-2027-declaration',
+    title: 'Editorial: See Why David Ombugadu Is The Right Man For The Job',
+    excerpt: 'A Direct Pronouncement Reorients the Political Narrative and Nullifies Deputy Ticket Rumors',
+    content: `In the prelude to every major electoral cycle, conjecture often competes with fact, and rumor attempts to masquerade as reality. The unfolding political discourse surrounding the 2027 Nasarawa State governorship race has been no exception. Persistent claims suggesting that David Ombugadu is positioning himself for a deputy governorship slot have circulated in various quarters. That narrative, however, has now been authoritatively extinguished. Ombugadu himself has made an explicit and unambiguous declaration: his aspiration is for the office of Governor.
+
+Such a forthright proclamation carries decisive weight. In political communication, there exists no higher evidentiary standard than a candidate’s own categorical statement of intent. Ombugadu’s declaration is neither implied nor speculative — it is deliberate, direct, and dispositive. It reconfigures the conversation and renders contrary insinuations untenable.
+
+The endurance of the deputy governorship rumor illustrates a familiar electoral phenomenon: premature projections and strategically seeded interpretations often seek to define candidacies before aspirants define themselves. These narratives, while sometimes politically motivated, frequently generate avoidable confusion among supporters and the broader electorate. In this instance, the candidate’s own voice has superseded the rumor mill, restoring clarity where ambiguity had been allowed to fester.
+
+Moreover, Ombugadu’s stated ambition coheres with his political pedigree, electoral history, and leadership profile. Figures who have operated at the apex of gubernatorial contests seldom recalibrate toward subordinate roles absent a formal coalition framework or negotiated alliance — neither of which has been credibly advanced here. Instead, what has emerged is a self-articulated, principal-ticket ambition that aligns with his established political trajectory.
+
+This clarification should serve as a pivot point for more substantive civic engagement. Electoral dialogue in Nasarawa State ought now to transcend speculative ticket permutations and instead interrogate matters of governance philosophy, developmental strategy, institutional reform, and administrative competence. Democracies are strengthened when voter attention is directed toward vision and viability rather than rumor and conjecture.
+
+Political commentators, stakeholders, and opinion shapers bear a corresponding obligation to elevate factual accuracy above sensational repetition. To perpetuate a disproven narrative after a candidate’s unequivocal declaration is not merely imprecise — it is intellectually negligent.
+
+With his personal and public pronouncement, David Ombugadu has conclusively settled the matter of his 2027 electoral objective. The proposition is no longer interpretive; it is declarative. His candidacy, by his own words, is aimed squarely at the governorship — unequivocally, unapologetically, and unmistakably.`,
+    category: 'Politics',
+    image: '/uploads/David.jpeg',
+    author: {
+      id: 'editorial-board',
+      name: 'Veritus Editorial Board',
+      avatar: '/uploads/David.jpeg',
+      bio: 'Official Editorial Voice of Veritus International',
+      articles: 1024,
+      followers: 85400,
+      following: 12
+    },
+    publishDate: '2026-02-03',
+    readTime: 5,
+    views: 45200,
+    featured: true,
+    bookmarked: false,
+    likes: 1542,
+    tags: ['Politics', 'Nasarawa 2027', 'Ombugadu', 'Clarification']
+  },
   {
     id: '1',
     title: 'The Future of Global Markets in 2025',
@@ -54,15 +95,20 @@ const mockArticles: Article[] = [
     category: 'Business',
     image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&h=600&fit=crop',
     author: {
+      id: 'lanre-lawal',
       name: 'Lanrewaju Lawal',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
       bio: 'Main Author & Admin of VERITUS INTERNATIONAL',
       articles: 186,
-      followers: 52100
+      followers: 52100,
+      following: 240
     },
     publishDate: '2024-01-15',
     readTime: 8,
     views: 5420,
+    featured: false,
+    bookmarked: false,
+    likes: 234,
     tags: ['Business', 'Markets', 'Investment']
   },
 ];
@@ -78,7 +124,6 @@ export function ArticleDetailPage({ articleId, onBack, onArticleClick }: Article
   const [loading, setLoading] = useState(true);
   const [readProgress, setReadProgress] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
@@ -236,10 +281,10 @@ export function ArticleDetailPage({ articleId, onBack, onArticleClick }: Article
               <div>
                 <p className="font-semibold text-lg">{article.author.name}</p>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span>{new Date(article.publishDate).toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    day: 'numeric', 
-                    year: 'numeric' 
+                  <span>{new Date(article.publishDate).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
                   })}</span>
                   <span>•</span>
                   <span className="flex items-center gap-1">
@@ -313,82 +358,42 @@ export function ArticleDetailPage({ articleId, onBack, onArticleClick }: Article
       {/* Article Content */}
       <div className="px-4 sm:px-6 lg:px-8 pb-16">
         <div className="max-w-4xl mx-auto">
+          {/* Article Content */}
           <div className="prose prose-lg dark:prose-invert max-w-none">
-            <p className="text-lg leading-relaxed mb-6">
-              Artificial Intelligence has fundamentally transformed from a speculative concept into an integral 
-              part of our daily lives. From the moment we wake up to smart alarms that analyze our sleep patterns, 
-              to the recommendation systems that curate our evening entertainment, AI has woven itself into the 
-              fabric of modern existence.
-            </p>
-
-            <h2 className="font-['Playfair_Display'] text-3xl font-bold mt-12 mb-6">
-              The Evolution of Machine Learning
-            </h2>
-
-            <p className="text-lg leading-relaxed mb-6">
-              The journey from rule-based systems to neural networks represents one of the most significant 
-              technological leaps in human history. Traditional programming required explicit instructions for 
-              every possible scenario. Machine learning, by contrast, enables systems to learn patterns from 
-              data and make decisions independently.
-            </p>
-
-            <Card className="my-8 p-8 bg-muted/50 border-l-4 border-primary">
-              <p className="text-xl italic leading-relaxed">
-                "The question is not whether AI will change our world, but how we choose to shape that change. 
-                We stand at a crossroads between utopia and dystopia, and our decisions today will echo through 
-                generations."
+            {article.content.split('\n\n').map((paragraph, index) => (
+              <p key={index} className="text-lg leading-relaxed mb-6">
+                {paragraph}
               </p>
-              <p className="text-sm text-muted-foreground mt-4">
-                — Dr. Yann LeCun, Chief AI Scientist at Meta
-              </p>
-            </Card>
+            ))}
+          </div>
 
-            <p className="text-lg leading-relaxed mb-6">
-              Recent breakthroughs in large language models, computer vision, and reinforcement learning have 
-              accelerated capabilities beyond what many experts predicted even five years ago. GPT-4 and its 
-              successors demonstrate reasoning abilities that blur the line between narrow and general intelligence.
-            </p>
-
-            <h2 className="font-['Playfair_Display'] text-3xl font-bold mt-12 mb-6">
-              Practical Applications Today
-            </h2>
-
-            <p className="text-lg leading-relaxed mb-6">
-              Healthcare leads the charge in AI adoption, with diagnostic systems achieving accuracy rates that 
-              rival or exceed human specialists in specific domains. Radiology, pathology, and drug discovery 
-              have all been revolutionized by deep learning architectures.
-            </p>
-
-            <ul className="space-y-3 my-6 text-lg">
-              <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">→</span>
-                <span>Medical imaging analysis detecting cancers at earlier stages</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">→</span>
-                <span>Personalized treatment recommendations based on genetic profiles</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">→</span>
-                <span>Drug discovery accelerated from years to months through molecular simulation</span>
-              </li>
-            </ul>
-
-            <h2 className="font-['Playfair_Display'] text-3xl font-bold mt-12 mb-6">
-              Ethical Considerations and Challenges
-            </h2>
-
-            <p className="text-lg leading-relaxed mb-6">
-              With great power comes great responsibility. The rapid advancement of AI raises critical questions 
-              about privacy, bias, accountability, and the future of human labor. Algorithmic bias in criminal 
-              justice, lending, and hiring demonstrates how AI can perpetuate and amplify existing societal inequalities.
-            </p>
-
-            <p className="text-lg leading-relaxed mb-6">
-              The path forward requires multidisciplinary collaboration between technologists, ethicists, 
-              policymakers, and affected communities. We must build AI systems that are not just powerful, 
-              but also fair, transparent, and aligned with human values.
-            </p>
+          {/* Media Gallery (Provision for video and pictures) */}
+          <div className="mt-12">
+            <h3 className="font-['Playfair_Display'] text-2xl font-bold mb-6">Media & Press Gallery</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Photo Placeholder */}
+              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden group cursor-pointer">
+                <img src={article.image} alt="Gallery 1" className="object-cover w-full h-full transition-transform group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                <Badge className="absolute bottom-4 left-4">Photo</Badge>
+              </div>
+              {/* Video Placeholder */}
+              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden group cursor-pointer flex items-center justify-center bg-gray-900">
+                <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1" />
+                </div>
+                <Badge className="absolute bottom-4 left-4 bg-red-600 hover:bg-red-700">Video</Badge>
+              </div>
+              {/* More Photos */}
+              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden group cursor-pointer">
+                <img src="/uploads/David.jpeg" alt="Gallery 2" className="object-cover w-full h-full transition-transform group-hover:scale-105" onError={(e) => e.currentTarget.src = article.image} />
+                <Badge className="absolute bottom-4 left-4">Photo</Badge>
+              </div>
+              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden group cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1541872703-9993309a67a0?auto=format&fit=crop&q=80" alt="Gallery 3" className="object-cover w-full h-full transition-transform group-hover:scale-105" />
+                <Badge className="absolute bottom-4 left-4">Photo</Badge>
+              </div>
+            </div>
           </div>
 
           {/* Tags */}

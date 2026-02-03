@@ -1,6 +1,8 @@
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { AnalyticsDashboard } from './admin/AnalyticsDashboard';
+import { UserManagementDashboard } from './admin/UserManagementDashboard';
 import {
   LayoutDashboard,
   FileText,
@@ -55,12 +57,11 @@ export function AdminDashboard({ onNewArticle }: AdminDashboardProps) {
     return (
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-            title === 'Total Views' ? 'bg-blue-500/10 text-blue-500' :
+          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${title === 'Total Views' ? 'bg-blue-500/10 text-blue-500' :
             title === 'Articles' ? 'bg-green-500/10 text-green-500' :
-            title === 'Active Users' ? 'bg-purple-500/10 text-purple-500' :
-            'bg-amber-500/10 text-amber-500'
-          }`}>
+              title === 'Active Users' ? 'bg-purple-500/10 text-purple-500' :
+                'bg-amber-500/10 text-amber-500'
+            }`}>
             <Icon className="h-6 w-6" />
           </div>
           <Badge variant={isPositive ? 'default' : 'destructive'} className="gap-1">
@@ -96,11 +97,10 @@ export function AdminDashboard({ onNewArticle }: AdminDashboardProps) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-muted text-muted-foreground'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === tab.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted text-muted-foreground'
+                    }`}
                 >
                   <Icon className="h-5 w-5" />
                   <span className="font-medium">{tab.label}</span>
@@ -303,16 +303,15 @@ export function AdminDashboard({ onNewArticle }: AdminDashboardProps) {
                   <div className="space-y-4">
                     {recentActivity.map((activity) => (
                       <div key={activity.id} className="flex gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          activity.type === 'article' ? 'bg-blue-500/10 text-blue-500' :
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${activity.type === 'article' ? 'bg-blue-500/10 text-blue-500' :
                           activity.type === 'comment' ? 'bg-green-500/10 text-green-500' :
-                          activity.type === 'user' ? 'bg-purple-500/10 text-purple-500' :
-                          'bg-pink-500/10 text-pink-500'
-                        }`}>
+                            activity.type === 'user' ? 'bg-purple-500/10 text-purple-500' :
+                              'bg-pink-500/10 text-pink-500'
+                          }`}>
                           {activity.type === 'article' ? <FileText className="h-4 w-4" /> :
-                           activity.type === 'comment' ? <Edit className="h-4 w-4" /> :
-                           activity.type === 'user' ? <Users className="h-4 w-4" /> :
-                           <TrendingUp className="h-4 w-4" />}
+                            activity.type === 'comment' ? <Edit className="h-4 w-4" /> :
+                              activity.type === 'user' ? <Users className="h-4 w-4" /> :
+                                <TrendingUp className="h-4 w-4" />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm">
@@ -415,13 +414,15 @@ export function AdminDashboard({ onNewArticle }: AdminDashboardProps) {
             </div>
           )}
 
-          {(activeTab === 'analytics' || activeTab === 'users' || activeTab === 'settings') && (
+          {activeTab === 'analytics' && <AnalyticsDashboard />}
+
+          {activeTab === 'users' && <UserManagementDashboard />}
+
+          {activeTab === 'settings' && (
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  {activeTab === 'analytics' && <BarChart3 className="h-8 w-8 text-muted-foreground" />}
-                  {activeTab === 'users' && <Users className="h-8 w-8 text-muted-foreground" />}
-                  {activeTab === 'settings' && <Settings className="h-8 w-8 text-muted-foreground" />}
+                  <Settings className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">
                   {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Section

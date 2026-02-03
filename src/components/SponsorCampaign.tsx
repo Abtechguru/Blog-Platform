@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
-import { 
-  Users, 
-  Calendar, 
-  Heart, 
-  Share2, 
+import {
+  Users,
+  Calendar,
+  Heart,
+  Share2,
   ExternalLink,
   CheckCircle,
   TrendingUp,
@@ -14,7 +14,7 @@ import {
   Target
 } from 'lucide-react';
 
-export function SponsorCampaign() {
+export function SponsorCampaign({ onViewCampaign }: { onViewCampaign?: () => void }) {
   const [supporters, setSupporters] = useState(15842);
   const [donations, setDonations] = useState(65234000);
   const [isVisible, setIsVisible] = useState(false);
@@ -42,7 +42,7 @@ export function SponsorCampaign() {
     <section className={`relative py-20 overflow-hidden transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#008000]/5 via-transparent to-[#FFD700]/5" />
-      
+
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#008000]/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#FFD700]/5 rounded-full blur-3xl" />
@@ -124,15 +124,21 @@ export function SponsorCampaign() {
 
                   {/* CTA Buttons */}
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button 
+                    <Button
                       className="bg-[#FFD700] text-[#006400] hover:bg-[#FFD700]/90 font-bold flex-1"
-                      onClick={() => window.open('https://ombugadu.com/', '_blank')}
+                      onClick={() => {
+                        if (onViewCampaign) {
+                          onViewCampaign();
+                        } else {
+                          window.open('https://ombugadu.com/', '_blank');
+                        }
+                      }}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
-                      Visit Campaign Site
+                      View Campaign
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="border-white text-white hover:bg-white hover:text-[#008000] flex-1"
                     >
                       <Share2 className="h-4 w-4 mr-2" />
@@ -147,7 +153,7 @@ export function SponsorCampaign() {
                 {/* Candidate Image */}
                 <div className="mb-8 relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#008000]/20 to-[#FFD700]/20 rounded-2xl transform group-hover:scale-105 transition-transform duration-500" />
-                  <img 
+                  <img
                     src="/uploads/David.jpeg"
                     alt="David Ombugadu"
                     className="relative rounded-2xl w-full h-64 object-cover shadow-xl"
@@ -163,9 +169,9 @@ export function SponsorCampaign() {
                   <h3 className="font-['Playfair_Display'] text-2xl font-bold text-[#008000] mb-4">
                     2027 Manifesto Highlights
                   </h3>
-                  
+
                   {manifesto.map((item, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="flex gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 dark:border-gray-700 group hover:border-[#008000]/30"
                     >
@@ -196,7 +202,7 @@ export function SponsorCampaign() {
                         Restoring the Mandate
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Join the movement to restore the people's mandate in Nasarawa State. 
+                        Join the movement to restore the people's mandate in Nasarawa State.
                         Together, we can build a future of prosperity, education, and healthcare for all.
                       </p>
                     </div>

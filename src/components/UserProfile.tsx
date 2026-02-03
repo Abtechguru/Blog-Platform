@@ -25,7 +25,9 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase-client';
-
+import { useGamification } from '../contexts/GamificationContext';
+import { Trophy, Star, TrendingUp, Crown } from 'lucide-react';
+import { Progress } from './ui/progress';
 interface UserProfileProps {
     onBack: () => void;
     onArticleClick?: (articleId: string) => void;
@@ -33,6 +35,7 @@ interface UserProfileProps {
 
 export function UserProfile({ onBack, onArticleClick }: UserProfileProps) {
     const { user, profile, isSubscribed, subscribeToPage, unsubscribeFromPage, signOut, refreshProfile } = useAuth();
+    const { points, level, badges, achievements, leaderboard } = useGamification();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -232,6 +235,10 @@ export function UserProfile({ onBack, onArticleClick }: UserProfileProps) {
                                 <TabsTrigger value="security" className="gap-2">
                                     <Shield className="h-4 w-4" />
                                     <span className="hidden sm:inline">Security</span>
+                                </TabsTrigger>
+                                <TabsTrigger value="achievements" className="gap-2">
+                                    <Trophy className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Achievements</span>
                                 </TabsTrigger>
                             </TabsList>
                         </CardHeader>
@@ -439,6 +446,97 @@ export function UserProfile({ onBack, onArticleClick }: UserProfileProps) {
                                             </div>
                                         </Card>
                                     </div>
+                                </div>
+                            </TabsContent>
+
+                            {/* Achievements Tab */}
+                            <TabsContent value="achievements" className="space-y-6 mt-0">
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h3 className="font-semibold text-lg">Your Progress</h3>
+                                            <p className="text-sm text-muted-foreground">Keep interacting to earn points and badges!</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-2xl font-bold text-[#1a365d]">Level {level}</div>
+                                            <div className="text-sm text-muted-foreground">{points} Points</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Level Progress */}
+                                    <div className="mb-8">
+                                        <div className="flex justify-between text-xs mb-2">
+                                            <span>Level {level}</span>
+                                            <span>Level {level + 1}</span>
+                                        </div>
+                                        <Progress value={(points % 1000) / 10} className="h-2" />
+                                        <p className="text-xs text-muted-foreground mt-2 text-center">
+                                            {1000 - (points % 1000)} points to next level
+                                        </p>
+                                    </div>
+
+                                    {/* Badges */}
+                                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                                        <Award className="h-4 w-4 text-orange-500" />
+                                        Badges
+                                    </h4>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                                        {badges.map((badge) => (
+                                            <Card key={badge.id} className="text-center p-4 hover:shadow-md transition-shadow">
+                                                <div className="text-3xl mb-2">{badge.icon}</div>
+                                                <div className="font-semibold text-sm">{badge.name}</div>
+                                                <div className="text-xs text-muted-foreground">{badge.description}</div>
+                                            </Card>
+                                        ))}
+                                    </div>
+
+                                    {/* Achievements */}
+                                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                                        <Target className="h-4 w-4 text-blue-500" />
+                                        Missions
+                                    </h4>
+                                    <div className="space-y-4 mb-8">
+                                        {achievements.map((ach) => (
+                                            <div key={ach.id} className="border rounded-lg p-4">
+                                                <div className="flex justify-between mb-2">
+                                                    <span className={`font-medium ${ach.completed ? 'text-green-600 line-through' : ''}`}>{ach.title}</span>
+                                                    <span className="text-sm text-muted-foreground">+{ach.points} pts</span>
+                                                </div>
+                                                <Progress value={(ach.progress / ach.maxProgress) * 100} className="h-2 mb-2" />
+                                                <div className="flex justify-between text-xs text-muted-foreground">
+                                                    <span>{ach.description}</span>
+                                                    <span>{ach.progress}/{ach.maxProgress}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Leaderboard */}
+                                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                                        <Crown className="h-4 w-4 text-yellow-500" />
+                                        Leaderboard
+                                    </h4>
+                                    <Card>
+                                        <div className="divide-y">
+                                            {leaderboard.map((player, index) => (
+                                                <div key={index} className="flex items-center justify-between p-4 hover:bg-muted/50">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`
+                                                            w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs
+                                                            ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                                                                index === 1 ? 'bg-gray-100 text-gray-700' :
+                                                                    index === 2 ? 'bg-orange-100 text-orange-700' : 'text-muted-foreground'}
+                                                        `}>
+                                                            {index + 1}
+                                                        </div>
+                                                        <span className={player.name === 'You' ? 'font-bold' : ''}>{player.name}</span>
+                                                    </div>
+                                                    <span className="font-mono text-sm">{player.points.toLocaleString()} pts</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Card>
+
                                 </div>
                             </TabsContent>
                         </CardContent>
