@@ -129,7 +129,9 @@ export function ArticleDetailPage({ articleId, onBack, onArticleClick }: Article
   const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
 
   useEffect(() => {
-    fetchArticle();
+    const controller = new AbortController();
+    fetchArticle(controller.signal);
+    return () => controller.abort();
   }, [articleId]);
 
   useEffect(() => {
@@ -144,12 +146,13 @@ export function ArticleDetailPage({ articleId, onBack, onArticleClick }: Article
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const fetchArticle = async () => {
+  const fetchArticle = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-302887ca/articles/${articleId}`,
         {
+          signal,
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,
           },
@@ -159,17 +162,19 @@ export function ArticleDetailPage({ articleId, onBack, onArticleClick }: Article
       if (response.ok) {
         const data = await response.json();
         setArticle(data);
-        fetchRelatedArticles(data.category);
+        fetchRelatedArticles(data.category, signal);
       } else {
         // Fallback to mock data
+        console.warn('Article not found on server, using mock data');
         const mockArticle = mockArticles.find(a => a.id === articleId);
         setArticle(mockArticle || null);
         if (mockArticle) {
-          fetchRelatedArticles(mockArticle.category);
+          fetchRelatedArticles(mockArticle.category, signal);
         }
       }
-    } catch (error) {
-      console.error('Error fetching article:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
+      console.error('Network error fetching article, using mock data:', error);
       const mockArticle = mockArticles.find(a => a.id === articleId);
       setArticle(mockArticle || null);
       if (mockArticle) {
@@ -179,15 +184,18 @@ export function ArticleDetailPage({ articleId, onBack, onArticleClick }: Article
         setRelatedArticles(related);
       }
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
-  const fetchRelatedArticles = async (category: string) => {
+  const fetchRelatedArticles = async (category: string, signal?: AbortSignal) => {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-302887ca/articles`,
         {
+          signal,
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,
           },

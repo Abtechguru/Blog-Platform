@@ -131,15 +131,18 @@ export function HomePage({ onArticleClick, onViewCampaign }: HomePageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchArticles();
+    const controller = new AbortController();
+    fetchArticles(controller.signal);
+    return () => controller.abort();
   }, []);
 
-  const fetchArticles = async () => {
+  const fetchArticles = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-302887ca/articles`,
         {
+          signal,
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,
           },
@@ -151,15 +154,18 @@ export function HomePage({ onArticleClick, onViewCampaign }: HomePageProps) {
         // If no articles in DB, use mock data
         setArticles(data.length > 0 ? data : mockArticles);
       } else {
-        // Fallback to mock data on error
-        console.error('Failed to fetch articles, using mock data');
+        // Fallback to mock data on error/404
+        console.warn('Supabase function returned error, using mock data');
         setArticles(mockArticles);
       }
-    } catch (error) {
-      console.error('Error fetching articles:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
+      console.error('Network error fetching articles, using mock data:', error);
       setArticles(mockArticles);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
